@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+.env
+*.egg-info/
+dist/
+build/
+
+# Models & data (persisted via volumes, not in git)
+models/
+*.onnx
+*.onnx.json
+/data/
+*.db
+*.sqlite
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Audio temp
+*.wav
+*.mp3
+*.pcm

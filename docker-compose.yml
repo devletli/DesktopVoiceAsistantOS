@@ -1,0 +1,76 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: jarvis-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    # Ollama's port only within compose network, not exposed to host by default
+    # Expose to host only if you need direct access: uncomment ports
+    # ports:
+    #   - "11434:11434"
+    expose:
+      - "11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        AUDIO_GID: ${AUDIO_GID:-29}
+    container_name: jarvis-assistant
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    # Linux-only audio passthrough
+    devices:
+        - /dev/snd:/dev/snd
+    # Alternative: use group_add to inject host audio GID at runtime (no rebuild)
+    # Get host GID: getent group audio | cut -d: -f3
+    group_add:
+      - ${AUDIO_GID:-29}
+    volumes:
+      - ./.env:/app/.env:ro
+      - whisper_cache:/models/whisper
+      - piper_models:/models/piper
+      # File bind only: dir bind ./models:/models would shadow whisper/piper named volumes above
+      - ./models/wakeword.onnx:/models/wakeword.onnx:ro
+      - jarvis_data:/data
+      # heartbeat file is internal only — no host bind needed (was causing Permission denied on Windows)
+      # - /tmp/jarvis_heartbeat:/tmp/jarvis_heartbeat
+    env_file:
+      - .env
+    environment:
+      # Ensure Ollama URL resolves within compose network
+      - OLLAMA_BASE_URL=http://ollama:11434
+    # No ports exposed externally — healthcheck uses heartbeat file, not HTTP
+    # If you need logs: docker compose logs -f assistant
+
+    # CPU by default; GPU profile below
+
+# ── Optional GPU profile ─────────────────────────────────────
+# Run with: docker compose --profile gpu up -d
+# Requires nvidia-container-toolkit on host
+#   services:
+#     assistant:
+#       profiles: ["gpu"]
+#       deploy:
+#         resources:
+#           reservations:
+#             # devices:
+#               - driver: nvidia
+#                 count: 1
+#                 capabilities: [gpu]
+
+volumes:
+  ollama_data:
+  whisper_cache:
+  piper_models:
+  jarvis_data:

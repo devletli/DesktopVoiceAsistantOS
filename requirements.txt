@@ -1,0 +1,42 @@
+# Jarvis Voice Assistant — pinned, verified versions (2026-09-25)
+# Verified via `pip index versions` in this build environment.
+# Unverified deps flagged in KNOWN_ASSUMPTIONS.md
+
+# ── Core config ────────────────────────────────────────────
+pydantic==2.11.9
+pydantic-settings==2.10.1
+
+# ── Audio / VAD ────────────────────────────────────────────
+sounddevice==0.5.6
+onnxruntime==1.30.0
+numpy>=1.24  # transitive, not strictly pinned — see KNOWN_ASSUMPTIONS.md
+
+# ── Wake word ──────────────────────────────────────────────
+openwakeword==0.6.0
+
+# ── STT ────────────────────────────────────────────────────
+faster-whisper==1.2.1
+# ctranslate2 is pulled by faster-whisper
+
+# ── LLM / Memory ───────────────────────────────────────────
+langchain==1.4.2
+langchain-community==0.4.2
+langchain-core>=0.3.0  # transitive
+langchain-openai>=0.2.0  # for OpenAI provider
+openai==1.107.3
+ollama==0.6.2
+
+# ── Audio playback (was missing: play_wav fell back to aplay) ──
+soundfile==0.13.1
+
+# ── Memory SQLite (was missing: greenlet needed for sqlalchemy[asyncio]) ──
+greenlet==3.2.4
+sqlalchemy==2.0.43
+
+# ── TTS ────────────────────────────────────────────────────
+piper-tts==1.8.0
+edge-tts==7.2.8
+
+# ── Testing ────────────────────────────────────────────────
+pytest==8.4.2
+pytest-asyncio>=0.21.0
